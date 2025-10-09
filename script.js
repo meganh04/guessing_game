@@ -86,6 +86,28 @@ if (!window.SpeechRecognition) {
 
       msgEl.appendChild(h2);
       msgEl.appendChild(button);
+      // Stop listening when the user wins
+      try {
+        recognition.stop();
+      } catch (e) {
+        console.warn('Error stopping recognition after win:', e);
+      }
+      // Clear recognizing flag if present
+      try {
+        if (typeof isRecognizing !== 'undefined') isRecognizing = false;
+      } catch (e) { /* ignore */ }
+      // Stop microphone tracks if we captured a stream
+      if (window._microphoneStream) {
+        try {
+          window._microphoneStream.getTracks().forEach((t) => t.stop());
+        } catch (e) {
+          console.debug('Error stopping microphone tracks after win:', e);
+        }
+        window._microphoneStream = null;
+      }
+      // Remove listening visual from mic if present
+      const micEl = document.querySelector('img[alt*="mic"], img[alt*="Mic"], img[alt*="Microphone"], img');
+      if (micEl) micEl.classList.remove('listening');
     } else if (num > randomNum) {
       const div = document.createElement('div');
       div.textContent = 'GO LOWER';
